@@ -36,6 +36,11 @@ jobs:
       apksignerKeystoreAlias: '$(keystoreName)'
       apksignerKeyPassword: '$(keystorePassword)'
 
+  - task: PublishBuildArtifacts@1
+    inputs:
+      targetPath: 'Xam2.Android/obj/Release/android/bin/ch.bzumbuehl.xam2.apk'
+      artifactName: AndroidApk
+
 
 
 - job: BuildiOS
