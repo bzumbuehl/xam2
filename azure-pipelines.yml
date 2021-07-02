@@ -28,6 +28,15 @@ jobs:
       outputDirectory: '$(outputDirectory)'
       configuration: '$(buildConfiguration)'
 
+  - task: AndroidSigning@3
+    inputs:
+      apkFiles: '**/*.apk'
+      apksignerKeystoreFile: 'xam2.keystore'
+      apksignerKeystorePassword: '$(keystorePassword)'
+      apksignerKeystoreAlias: '$(keystoreName)'
+      apksignerKeyPassword: '$(keystorePassword)'
+
+
 
 - job: BuildiOS
   displayName: "Build iOS App"
