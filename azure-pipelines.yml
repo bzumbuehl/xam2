@@ -38,7 +38,7 @@ jobs:
 
   - task: PublishPipelineArtifact@1
     inputs:
-      targetPath: 'Xam2.Android/obj/Release/android/bin/ch.bzumbuehl.xam2.apk'
+      targetPath: 'xam2.Android/obj/Release/android/bin/ch.bzumbuehl.xam2.apk'
       artifactName: AndroidApk
 
 
