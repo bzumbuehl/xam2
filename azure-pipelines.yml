@@ -7,112 +7,17 @@ pool:
 variables:
   buildConfiguration: 'Release'
   outputDirectory: '$(build.binariesDirectory)/$(buildConfiguration)'
-  solutionName: 'xam2.sln' 
-  androidProject: 'xam2.Android/xam2.Android.csproj'
 
-stages:
-- stage: BuildApps
-  displayName: "Build The Apps"
+steps:
+- task: NuGetToolInstaller@1
 
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '**/*.sln'
 
-  jobs:
-  - job: BuildAndroid
-    displayName: "Build Android App" 
-
-    steps:
-    - task: NuGetToolInstaller@1
-
-    - task: NuGetCommand@2
-      inputs:
-        restoreSolution: '$(solutionName)'
-
-    - task: XamarinAndroid@1
-      inputs:
-        projectFile: '$(androidProject)'
-        outputDirectory: '$(outputDirectory)'
-        configuration: '$(buildConfiguration)'
-    - task: AndroidSigning@3
-      inputs:
-        apkFiles: '**/*.apk'
-        apksignerKeystoreFile: 'xam2.keystore'
-        apksignerKeystorePassword: '$(keystorePassword)'
-        apksignerKeystoreAlias: '$(keystoreName)'
-        apksignerKeyPassword: '$(keystorePassword)'
-    - task: PublishPipelineArtifact@1
-      inputs:
-        targetPath: 'xam2.Android/obj/Release/android/bin/com.bzumbuehl.xam2.apk'
-        artifactName: AndroidApk 
-
-- stage: BetaVersions
-  dependsOn: BuildApps
-  displayName: "Beta releases"
-  jobs:
-
-  - job: AndroidBeta
-    displayName: "Release Android Beta" 
-    steps: 
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifact: AndroidApk
+- task: XamarinAndroid@1
+  inputs:
+    projectFile: '**/*droid.cspro'
+    outputDirectory: '$(outputDirectory)'
+    configuration: '$(buildConfiguration)'
     
-    - task: AppCenterDistribute@3
-      inputs:
-        serverEndpoint: 'App Center'
-        appSlug: 'xam2/xam2-1'
-        appFile: '$(Pipeline.Workspace)/com.bzumbuehl.xam2.apk'
-        releaseNotesOption: 'file'
-        releaseNotesFile: 'releasenotes.txt'
-        destinationType: 'groups'
-        distributionGroupId: '8be189c3-019a-41a8-b321-b6cf0ecf4087'
-
-  - job: BuildiOS
-    displayName: "Build iOS App"  
-    steps:
-
-    - task: NuGetToolInstaller@1
-
-    - task: NuGetCommand@2
-      inputs:
-        restoreSolution: '$(solutionName)'
-    - task: InstallAppleCertificate@2
-      inputs:
-        certSecureFile: 'Certifikate.p12'
-        certPwd: '3595'
-        
-
-    - task: InstallAppleProvisioningProfile@1
-      inputs:
-        provisioningProfileLocation: 'secureFiles'
-        provProfileSecureFile: 'Ad_Hoc_10_06_2021.mobileprovision'
-    - task: XamariniOS@2
-      inputs:
-        solutionFile: '$(solutionName)'
-        configuration: '$(buildConfiguration)'
-        packageApp: true
-        buildForSimulator: false
-        runNugetRestore: false
-        signingIdentity: '$(APPLE_CERTIFICATE_SIGNING_IDENTITY)'
-        signingProvisioningProfileID: '$(APPLE_PROV_PROFILE_UUID)'
-
-    - task: PublishPipelineArtifact@1
-      inputs:
-        targetPath: 'xam2.iOS/bin/iPhone/Release/xam2.iOS.ipa'
-        artifactName: iOSIpa 
-
-  - job: iOSBeta
-    displayName: "Release iOS Beta"
-    steps:
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifact: iOSIpa
-    - task: AppCenterDistribute@3
-      inputs:
-        serverEndpoint: 'App Center'
-        appSlug: 'xam2/xam2'
-        appFile: '$(Pipeline.Workspace)/xam2.iOS.ipa'
-        releaseNotesOption: 'file'
-        releaseNotesFile: 'releasenotes.txt'
-        destinationType: 'groups'
-        distributionGroupId: '3d02aa88-893f-47a7-a56a-7e22781bc1da'       
-
-
