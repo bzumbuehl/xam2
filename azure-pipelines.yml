@@ -10,70 +10,76 @@ variables:
   solutionName: 'xam2.sln'
   androidProject: 'xam2.Android/xam2.Android.csproj'
 
-jobs:
+stages:
+- stage: BuildApps
+  displayName: "Build The Apps"
+  jobs:
 
-- job: BuildAndroid
-  displayName: "Build Android App"
+  - job: BuildAndroid
+    displayName: "Build Android App"
 
-  steps:
-  - task: NuGetToolInstaller@1
+    steps:
+    - task: NuGetToolInstaller@1
 
-  - task: NuGetCommand@2
-    inputs:
-      restoreSolution: '$(solutionName)'
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: '$(solutionName)'
 
-  - task: XamarinAndroid@1
-    inputs:
-      projectFile: '$(androidProject)'
-      outputDirectory: '$(outputDirectory)'
-      configuration: '$(buildConfiguration)'
+    - task: XamarinAndroid@1
+      inputs:
+        projectFile: '$(androidProject)'
+        outputDirectory: '$(outputDirectory)'
+        configuration: '$(buildConfiguration)'
 
-  - task: AndroidSigning@3
-    inputs:
-      apkFiles: '**/*.apk'
-      apksignerKeystoreFile: 'xam2.keystore'
-      apksignerKeystorePassword: '$(keystorePassword)'
-      apksignerKeystoreAlias: '$(keystoreName)'
-      apksignerKeyPassword: '$(keystorePassword)'
+    - task: AndroidSigning@3
+      inputs:
+        apkFiles: '**/*.apk'
+        apksignerKeystoreFile: 'xam2.keystore'
+        apksignerKeystorePassword: '$(keystorePassword)'
+        apksignerKeystoreAlias: '$(keystoreName)'
+        apksignerKeyPassword: '$(keystorePassword)'
 
-  - task: PublishPipelineArtifact@1
-    inputs:
-      targetPath: 'xam2.Android/obj/Release/android/bin/ch.bzumbuehl.xam2.apk'
-      artifactName: AndroidApk
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: 'xam2.Android/obj/Release/android/bin/ch.bzumbuehl.xam2.apk'
+        artifactName: AndroidApk
 
 
 
-- job: BuildiOS
-  displayName: "Build iOS App"
+  - job: BuildiOS
+    displayName: "Build iOS App"
 
-  steps:
-  - task: NuGetToolInstaller@1
+    steps:
+    - task: NuGetToolInstaller@1
 
-  - task: NuGetCommand@2
-    inputs:
-      restoreSolution: '$(solutionName)'
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: '$(solutionName)'
 
-  - task: XamariniOS@2
-    inputs:
-      solutionFile: '$(solutionName)'
-      configuration: '$(buildConfiguration)'
-      packageApp: false
-      buildForSimulator: true
-      runNugetRestore: false
+    - task: XamariniOS@2
+      inputs:
+        solutionFile: '$(solutionName)'
+        configuration: '$(buildConfiguration)'
+        packageApp: false
+        buildForSimulator: true
+        runNugetRestore: false
 
-- job: AndroidBeta
-  displayName: "Release Android Beta"
-  dependsOn: [BuildAndroid]
-  steps:
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      artifact: AndroidApk
-  - task: AppCenterDistribute@3
-    inputs:
-      serverEndpoint: 'App Center'
-      appSlug: 'Xam2/Xam2-1'
-      appFile: '$(Pipeline.Workspace)/ch.bzumbuehl.xam2.apk'
-      releaseNotesOption: 'file'
-      releaseNotesFile: 'releasenotes.txt'
-      destinationType: 'groups'
-      distributionGroupId: 'f1e589a5-1fea-4935-b59a-2377d6070d60'
+- stage: BetaVersions
+  dependsOn: BuildApps
+  displayName: "Beta Release"
+  jobs:
+  - job: AndroidBeta
+    displayName: "Release Android Beta"
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: AndroidApk
+    - task: AppCenterDistribute@3
+      inputs:
+        serverEndpoint: 'App Center'
+        appSlug: 'Xam2/Xam2-1'
+        appFile: '$(Pipeline.Workspace)/ch.bzumbuehl.xam2.apk'
+        releaseNotesOption: 'file'
+        releaseNotesFile: 'releasenotes.txt'
+        destinationType: 'groups'
+        distributionGroupId: 'f1e589a5-1fea-4935-b59a-2377d6070d60'
