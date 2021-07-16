@@ -60,7 +60,6 @@ stages:
       inputs:
         certSecureFile: 'Certificates.p12'
         certPwd: 'Bzumbuehl.3595'
-        keychain: 'temp'
 
     - task: InstallAppleProvisioningProfile@1
       inputs:
