@@ -58,7 +58,7 @@ stages:
 
     - task: InstallAppleCertificate@2
       inputs:
-        certSecureFile: 'Certificates.p12'
+        certSecureFile: 'Certifikate.p12'
         certPwd: '$(keystorePassword)'
 
     - task: InstallAppleProvisioningProfile@1
