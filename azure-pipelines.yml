@@ -59,7 +59,7 @@ stages:
     - task: InstallAppleCertificate@2
       inputs:
         certSecureFile: 'Certificates.p12'
-        certPwd: 'Bzumbuehl.3595'
+        certPwd: '$(keystorePassword)'
 
     - task: InstallAppleProvisioningProfile@1
       inputs:
