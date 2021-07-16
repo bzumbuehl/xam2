@@ -60,3 +60,20 @@ jobs:
       packageApp: false
       buildForSimulator: true
       runNugetRestore: false
+
+- job: AndroidBeta
+  displayName: "Release Android Beta"
+  dependsOn: [BuildAndroid]
+  steps:
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      artifact: AndroidApk
+  - task: AppCenterDistribute@3
+    inputs:
+      serverEndpoint: 'App Center'
+      appSlug: 'Xam2/Xam2-1'
+      appFile: '$(Pipeline.Workspace)/ch.bzumbuehl.xam2.apk'
+      releaseNotesOption: 'file'
+      releaseNotesFile: 'releasenotes.txt'
+      destinationType: 'groups'
+      distributionGroupId: 'f1e589a5-1fea-4935-b59a-2377d6070d60'
